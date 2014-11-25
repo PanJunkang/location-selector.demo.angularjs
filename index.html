@@ -1,0 +1,87 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>地区选择 - AngularJS Demo</title>
+    <meta name="keywords" content="angular.js, Location selector">
+    <meta name="description" content="使用angular.js实现的全球地区选择器">
+    <meta name="author" content="Pan Junkang<yibangpjk@163.com>">
+    <style>[ng-cloak] { display: none; }</style>  
+  </head>
+  <body ng-app="locApp">
+    <h3>全球地区选择器 - 中文版</h3>
+    <div ng-cloak ng-controller="locCtrl">
+        <label>国家
+            <select ng-change="chooseCountry()" ng-model="country">
+                <option value="0">-- choose country --</option>
+                <option ng-repeat="country in countries" value="{{country.code}}">{{country.name}}</option>
+            </select>
+        </label>
+        
+        <label ng-show="states">省（州）
+            <select ng-model="state" ng-change="chooseState()">
+                <option value="0">-- choose state --</option>
+                <option ng-repeat="state in states" value="{{state.code}}">{{state.name}}</option>
+            </select>
+        </label>
+        
+        <label ng-show="state" ng-model="city">市
+            <select ng-model="city" ng-change="chooseCity()">
+                <option value="0">-- choose city --</option>
+                <option ng-repeat="city in cities" value="{{city.code}}">{{city.name}}</option>
+            </select>
+        </label>
+        
+        <label ng-show="regions">区
+            <select ng-model="region">
+                <option value="0">-- choose region --</option>
+                <option ng-repeat="region in regions" value="{{region.code}}">{{region.name}}</option>
+            </select>
+        </label>
+    </div>
+  <script src="location.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script>
+    angular.module("locApp", [])
+        .controller("locCtrl", function($scope, $window) {
+            $scope.countries = $window.Loc;
+            $scope.states = $scope.cities = $regions = null;
+            
+            $scope.country = $scope.state = $scope.city = $scope.region = 0;
+            $scope.chooseCountry = function() {
+                var countries = $window.Loc;
+                $scope.states = $scope.cities = $scope.regions = null;
+                $scope.state = $scope.city = $scope.region = 0;
+                
+                angular.forEach(countries, function(value, key) {
+                    if(value.code === $scope.country && value.child.length > 0) {
+                        $scope.states = value.child;
+                    }
+                });                
+            };
+            
+            $scope.chooseState = function() {
+                var states = $scope.states;
+                $scope.cities = $scope.regions = null;
+                $scope.city = $scope.region = 0;
+                angular.forEach(states, function(value, key) {
+                    if(value.code === $scope.state) {
+                        $scope.cities = value.child;
+                    }
+                });
+            };
+            
+            $scope.chooseCity = function() {
+                var cities = $scope.cities;
+                $scope.regions = null;
+                $scope.region = 0;
+                angular.forEach(cities, function(value, key) {                    
+                    if(value.code === $scope.city && value.child.length > 0) {
+                        $scope.regions = value.child;
+                    }                                       
+                });
+            };
+        });
+  </script>
+  </body>
+</html>
